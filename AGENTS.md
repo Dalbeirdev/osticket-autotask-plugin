@@ -1,4 +1,4 @@
-# Project Instructions
+# Project Instructions 
 
 We are building a custom osTicket plugin for Autotask integration.
 
