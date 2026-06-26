@@ -1,0 +1,10 @@
+/include/ost-config.php
+*.log
+*.sql.gz
+*.zip
+.env
+.env.*
+vendor/
+node_modules/
+.DS_Store
+Thumbs.db
