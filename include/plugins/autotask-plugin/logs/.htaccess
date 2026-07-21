@@ -1,0 +1,9 @@
+# Deny all direct web access to plugin log artifacts.
+# (Primary logging is in the database; this folder is for optional file dumps.)
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+</IfModule>

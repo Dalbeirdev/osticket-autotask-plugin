@@ -1,0 +1,219 @@
+/* ==========================================================================
+   Autotask Integration — dashboard styles (CSS3, no framework)
+   ========================================================================== */
+
+.at-wrap {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #2b2f33;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 16px;
+}
+
+.at-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    border-bottom: 2px solid #e4e8ec;
+    padding-bottom: 12px;
+    margin-bottom: 18px;
+}
+.at-header h1 { font-size: 22px; margin: 0; font-weight: 600; }
+.at-sub { color: #8a949e; font-weight: 400; font-size: 16px; }
+
+.at-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+.at-badge {
+    font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 12px;
+    background: #eef1f4; color: #51606e;
+}
+.at-badge.on, .at-badge.ok { background: #e3f6e9; color: #1f8f4d; }
+.at-badge.off, .at-badge.bad { background: #fdecec; color: #c0392b; }
+.at-badge.unk { background: #fff5e0; color: #b8860b; }
+
+/* Alerts */
+.at-alert { padding: 10px 14px; border-radius: 6px; margin-bottom: 14px; font-size: 14px; }
+.at-success { background: #e3f6e9; color: #1f8f4d; border: 1px solid #b6e6c6; }
+.at-error   { background: #fdecec; color: #c0392b; border: 1px solid #f3c2bd; }
+
+/* KPI cards */
+.at-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.at-card {
+    background: #fff; border: 1px solid #e4e8ec; border-radius: 8px; padding: 16px;
+    text-align: center; box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.at-card.warn { border-color: #f3c2bd; }
+.at-card-num { font-size: 26px; font-weight: 700; color: #2c3e50; }
+.at-card.warn .at-card-num { color: #c0392b; }
+.at-card-lbl { font-size: 12px; color: #8a949e; margin-top: 4px; text-transform: uppercase; letter-spacing: .04em; }
+
+/* Actions */
+.at-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; margin-bottom: 22px; }
+.at-inline { display: inline-flex; align-items: center; gap: 6px; margin: 0; }
+.at-num { width: 70px; padding: 5px; border: 1px solid #cfd6dc; border-radius: 4px; }
+
+/* Buttons — !important guards against osTicket's global button styling now
+   that the dashboard renders inside the staff-panel chrome. */
+.at-wrap .at-btn {
+    background: #1f6feb !important; color: #fff !important; border: none !important;
+    border-radius: 5px !important; padding: 8px 14px !important; font-size: 13px !important;
+    font-weight: 600 !important; cursor: pointer; text-decoration: none !important;
+    display: inline-block; line-height: 1.2 !important; height: auto !important;
+    box-shadow: none !important; text-shadow: none !important;
+}
+.at-wrap .at-btn:hover { background: #1a5fcc !important; }
+.at-wrap .at-btn-alt { background: #6f42c1 !important; }
+.at-wrap .at-btn-alt:hover { background: #5c36a3 !important; }
+.at-wrap .at-btn-warn { background: #e67e22 !important; }
+.at-wrap .at-btn-warn:hover { background: #cf6f1c !important; }
+.at-wrap .at-btn-ghost { background: #fff !important; color: #1f6feb !important; border: 1px solid #1f6feb !important; }
+.at-wrap .at-btn-ghost:hover { background: #eef4ff !important; }
+.at-wrap .at-btn-sm { padding: 4px 8px !important; font-size: 12px !important; }
+
+/* Panels & tables.
+   NB: class is "at-box", NOT "at-panel" — the ticket-view widget script
+   (scp/autotask-panel.php, loaded on every staff page via the footer)
+   removes all ".at-panel" elements on init, which would delete these. */
+.at-box { background: #fff; border: 1px solid #e4e8ec; border-radius: 8px; padding: 16px; margin-bottom: 18px; }
+.at-box h2 { font-size: 16px; margin: 0 0 12px; }
+
+/* Collapsible section headers (click to show/hide, remembered per browser) */
+h2.at-collapsible { cursor: pointer; user-select: none; display: flex; align-items: center; gap: 8px; }
+h2.at-collapsible:hover { color: #1f6feb; }
+h2.at-collapsible .at-count { color: #8a949e; font-weight: 400; font-size: 13px; }
+h2.at-collapsible .at-chev { margin-left: auto; font-size: 13px; color: #8a949e; transition: transform .15s ease; }
+h2.at-collapsible.collapsed { margin-bottom: 0; }
+h2.at-collapsible.collapsed .at-chev { transform: rotate(-90deg); }
+.at-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.at-table th, .at-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #eef1f4; }
+.at-table th { color: #8a949e; font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: .03em; }
+.at-table td.bad { color: #c0392b; font-weight: 600; }
+.at-err { color: #c0392b; font-family: monospace; font-size: 12px; }
+.at-muted { color: #8a949e; }
+
+/* Log level pills */
+.lvl-pill { font-size: 11px; padding: 2px 7px; border-radius: 10px; font-weight: 600; text-transform: uppercase; }
+.lvl-pill.lvl-error   { background: #fdecec; color: #c0392b; }
+.lvl-pill.lvl-warning { background: #fff5e0; color: #b8860b; }
+.lvl-pill.lvl-info    { background: #e8f0fe; color: #1f6feb; }
+.lvl-pill.lvl-debug   { background: #eef1f4; color: #51606e; }
+.at-logs tr.lvl-error td { background: #fff8f8; }
+
+.badge-failed, .badge-dead { color: #c0392b; font-weight: 600; }
+
+/* Filter bar */
+.at-filter { margin-bottom: 10px; display: flex; gap: 6px; }
+.at-filter a { font-size: 12px; padding: 4px 10px; border-radius: 12px; background: #eef1f4; color: #51606e; text-decoration: none; }
+.at-filter a.active { background: #1f6feb; color: #fff; }
+
+.at-footer { text-align: center; color: #8a949e; font-size: 12px; padding: 16px 0; }
+
+/* Button loader: CSS-only dancing figure over a blurred overlay */
+.at-loading-overlay {
+    position: fixed; inset: 0; z-index: 9998;
+    background: rgba(255,255,255,.8); backdrop-filter: blur(2px);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
+}
+.at-dancer { position: relative; width: 70px; height: 120px; animation: at-bounce .6s infinite; }
+.at-dancer .tail { position: absolute; top: -2px; width: 12px; height: 12px; border-radius: 50%; background: #b8860b; }
+.at-dancer .tail.l { left: 12px; animation: at-armL .6s infinite alternate; }
+.at-dancer .tail.r { right: 12px; animation: at-armR .6s infinite alternate; }
+.at-dancer .head { width: 24px; height: 24px; border-radius: 50%; background: #f4b183; margin: 0 auto; }
+.at-dancer .body { width: 9px; height: 30px; background: #1f6feb; margin: 1px auto 0; border-radius: 4px; }
+.at-dancer .skirt { width: 0; height: 0; margin: -4px auto 0; border-left: 18px solid transparent; border-right: 18px solid transparent; border-top: 20px solid #e6579a; }
+.at-dancer .arm { position: absolute; top: 30px; width: 26px; height: 6px; background: #f4b183; border-radius: 4px; }
+.at-dancer .arm.l { left: 6px; transform-origin: right center; animation: at-armL .6s infinite alternate; }
+.at-dancer .arm.r { right: 6px; transform-origin: left center; animation: at-armR .6s infinite alternate; }
+.at-dancer .leg { position: absolute; top: 78px; width: 7px; height: 34px; background: #f4b183; border-radius: 4px; transform-origin: top center; }
+.at-dancer .leg.l { left: 26px; animation: at-legL .6s infinite alternate; }
+.at-dancer .leg.r { right: 26px; animation: at-legR .6s infinite alternate; }
+.at-note { position: absolute; font-size: 18px; color: #1f6feb; animation: at-float 1.6s infinite; }
+.at-note.n1 { left: -26px; top: 22px; }
+.at-note.n2 { right: -26px; top: 8px; animation-delay: .8s; }
+@keyframes at-bounce { 0%,100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-12px) rotate(3deg); } }
+@keyframes at-armL { from { transform: rotate(55deg); } to { transform: rotate(-35deg); } }
+@keyframes at-armR { from { transform: rotate(-55deg); } to { transform: rotate(35deg); } }
+@keyframes at-legL { from { transform: rotate(18deg); } to { transform: rotate(-14deg); } }
+@keyframes at-legR { from { transform: rotate(-18deg); } to { transform: rotate(14deg); } }
+@keyframes at-float { 0% { opacity: 0; transform: translateY(8px); } 40% { opacity: 1; } 100% { opacity: 0; transform: translateY(-18px); } }
+.at-loading-text { font-weight: 700; color: #1f6feb; font-size: 14px; letter-spacing: .04em; animation: at-pulsetxt 1.2s infinite; }
+@keyframes at-pulsetxt { 50% { opacity: .45; } }
+
+/* Clients (Instance Manager) */
+.at-client-row { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.at-client-id { display: flex; align-items: center; gap: 12px; min-width: 260px; }
+.at-client-name { font-size: 15px; font-weight: 700; }
+.at-code {
+    display: inline-block; min-width: 44px; text-align: center; padding: 6px 8px;
+    background: #1f6feb; color: #fff; font-weight: 700; font-size: 12px;
+    border-radius: 6px; letter-spacing: .05em;
+}
+.at-client-off .at-code { background: #8a949e; }
+.at-client-off { opacity: .75; }
+.at-client-stats { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.at-client-actions { margin-left: auto; display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* Shared form layout (register form) */
+.at-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; align-items: end; }
+/* Selects need an explicit height or long label hints squeeze/clip the text. */
+select.at-fld {
+    height: 40px; padding: 8px 10px; line-height: 1.4;
+    appearance: auto; -webkit-appearance: menulist; background: #fff;
+}
+.at-lbl { display: block; font-size: 12px; font-weight: 600; color: #51606e; margin-bottom: 4px; }
+.at-fld {
+    width: 100%; padding: 8px 10px; border: 1px solid #cfd6dc; border-radius: 6px;
+    box-sizing: border-box; font-size: 13px; background: #fff;
+    transition: border-color .15s, box-shadow .15s;
+}
+.at-fld:focus { outline: none; border-color: #1f6feb; box-shadow: 0 0 0 3px rgba(31,111,235,.12); }
+
+/* Register form — section cards with icon headers */
+.at-box-h {
+    display: flex; align-items: center; gap: 12px;
+    margin: -16px -16px 16px; padding: 12px 16px;
+    background: #f7f9fb; border-bottom: 1px solid #e4e8ec;
+    border-radius: 8px 8px 0 0;
+}
+.at-box-h h2 { margin: 0; font-size: 15px; }
+.at-ico {
+    width: 34px; height: 34px; border-radius: 8px; flex: none;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 15px;
+}
+.at-box-sub { font-size: 12px; color: #8a949e; margin-top: 1px; }
+.at-checks { display: flex; gap: 24px; flex-wrap: wrap; }
+.at-checks label { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+.at-savebar {
+    display: flex; gap: 10px; align-items: center; margin: 18px 0;
+    padding: 14px 16px; background: #fff; border: 1px solid #e4e8ec; border-radius: 10px;
+    position: sticky; bottom: 12px; z-index: 50;
+    box-shadow: 0 6px 22px rgba(16, 24, 40, .14);
+}
+
+/* Register form polish */
+.at-box { border-radius: 10px; margin-bottom: 22px; box-shadow: 0 1px 3px rgba(16,24,40,.05); transition: box-shadow .15s; }
+.at-box:hover { box-shadow: 0 4px 16px rgba(16,24,40,.09); }
+.at-box-h { background: linear-gradient(180deg, #fafbfc, #f1f4f8); border-radius: 10px 10px 0 0; }
+.at-wrap input[type="checkbox"] { accent-color: #1f6feb; width: 15px; height: 15px; }
+.at-checks label {
+    background: #f7f9fb; border: 1px solid #e8edf2; border-radius: 8px;
+    padding: 8px 12px; transition: border-color .15s, background .15s; cursor: pointer;
+}
+.at-checks label:hover { border-color: #1f6feb; background: #f0f6ff; }
+.at-checks-desc { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 10px; }
+.at-checks-desc label { align-items: flex-start; }
+.at-checks-desc input[type="checkbox"] { margin-top: 3px; flex: none; }
+.at-checks-desc strong { display: block; font-size: 13px; margin-bottom: 2px; }
+.at-checks-desc small { display: block; color: #6b7684; font-size: 11.5px; line-height: 1.5; font-weight: 400; }
+.at-grid { gap: 16px 18px; }
+textarea[name="o_status_map"] {
+    font-family: Consolas, Menlo, monospace; font-size: 12px;
+    background: #fbfcfe; line-height: 1.7;
+}
+
+@media (max-width: 640px) {
+    .at-header { flex-direction: column; align-items: flex-start; }
+    .at-table { display: block; overflow-x: auto; }
+}

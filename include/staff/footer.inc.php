@@ -4,6 +4,8 @@
     <div id="footer">
         <?php echo __('Copyright &copy;') ?> 2006-<?php echo date('Y'); ?>&nbsp;<?php
         echo Format::htmlchars((string) $ost->company ?: 'osTicket.com'); ?>&nbsp;<?php echo __('All Rights Reserved.'); ?>
+        &nbsp;&middot;&nbsp;<a href="<?php echo ROOT_PATH; ?>scp/autotask-docs.php" target="_blank"
+            rel="noopener" class="no-pjax">Autotask Integration Guide (PDF)</a>
     </div>
 <?php
 if(is_object($thisstaff) && $thisstaff->isStaff()) { ?>
@@ -72,6 +74,7 @@ if ($thisstaff
     <script type="text/javascript" src="ajax.php/i18n/<?php
         echo $thisstaff->getLanguage(); ?>/js"></script>
 <?php } ?>
+<script src="<?php echo ROOT_PATH; ?>scp/autotask-panel.php"></script>
 </body>
 </html>
 <?php } # endif X_PJAX ?>

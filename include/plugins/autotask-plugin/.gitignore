@@ -1,0 +1,15 @@
+# Runtime logs (the folder itself ships with its .htaccess guard)
+logs/*.log
+logs/*.txt
+
+# Local/editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/
+
+# Never commit real credentials or site config
+ost-config.php
+*.local.php
