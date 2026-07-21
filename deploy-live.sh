@@ -12,7 +12,16 @@
 set -euo pipefail
 
 SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DEST="${DEST:-$HOME/domains/autotask.foxeraclub.com/public_html}"
+
+# Target: pass DEST=... explicitly, otherwise try the usual Hostinger layouts.
+if [ -z "${DEST:-}" ]; then
+    for c in "$HOME/public_html/autotask" \
+             "$HOME/domains/autotask.foxeraclub.com/public_html" \
+             "$HOME/domains/foxeraclub.com/public_html/autotask"; do
+        if [ -f "$c/include/class.osticket.php" ]; then DEST="$c"; break; fi
+    done
+fi
+DEST="${DEST:-$HOME/public_html/autotask}"
 STAMP="$(date +%F-%H%M)"
 BACKUP="$HOME/deploy-backups/$STAMP"
 
