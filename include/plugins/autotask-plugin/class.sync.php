@@ -901,6 +901,10 @@ class SyncEngine
         if (!$at) {
             return;
         }
+        // The ticket changed, so the panel's 24h detail cache (queue,
+        // assigned resource, contract...) is stale — drop it and let the
+        // next ticket view rebuild it.
+        $this->settings->setState('at_tctx_' . $atId, null);
 
         self::$suppress = true;
         try {

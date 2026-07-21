@@ -149,9 +149,10 @@ header('Cache-Control: no-cache');
     function fmt(s) { function p(n) { return (n < 10 ? '0' : '') + n; } return p(Math.floor(s / 3600)) + ':' + p(Math.floor((s % 3600) / 60)) + ':' + p(s % 60); }
     function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
     /* Hours -> Autotask's own display style: 1.1001 h => "1h 06m".
-       Minutes are floored exactly as Autotask's Time Summary does. */
+       Autotask ROUNDS to the nearest minute (0.3833 h = 22.998 min -> 23m),
+       so we must round too or totals read one minute short. */
     function hm(h) {
-        var mins = Math.floor((parseFloat(h) || 0) * 60 + 1e-6);
+        var mins = Math.round((parseFloat(h) || 0) * 60);
         var H = Math.floor(mins / 60), M = mins % 60;
         return H > 0 ? (H + 'h ' + (M < 10 ? '0' : '') + M + 'm') : (M + 'm');
     }
