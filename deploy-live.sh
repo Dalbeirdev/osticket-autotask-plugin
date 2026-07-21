@@ -43,17 +43,37 @@ for f in include/class.thread.php include/class.ticket.php \
          scp/autotask-timefields.php; do
     [ -f "$DEST/$f" ] && { mkdir -p "$BACKUP/$(dirname "$f")"; cp "$DEST/$f" "$BACKUP/$f"; }
 done
-[ -d "$DEST/include/plugins/autotask-plugin" ] && \
-    cp -r "$DEST/include/plugins/autotask-plugin" "$BACKUP/autotask-plugin-previous"
+for d in "$DEST"/include/plugins/*/; do
+    [ -f "$d/plugin.php" ] || continue
+    if grep -qs "Autotask Integration" "$d/plugin.php"; then
+        cp -r "$d" "$BACKUP/plugin-previous-$(basename "$d")"
+    fi
+done
 echo "==> backup : $BACKUP"
 
 # --- 1. plugin -------------------------------------------------------------
-mkdir -p "$DEST/include/plugins/autotask-plugin"
+# Deploy INTO the folder osTicket already has installed (often "autoatsk").
+# A second copy under a different name makes PHP fatal with
+# "Cannot declare class ... already in use", so never create one blindly.
+PLUGDIRS=()
+for d in "$DEST"/include/plugins/*/; do
+    [ -f "$d/plugin.php" ] || continue
+    grep -qs "Autotask Integration" "$d/plugin.php" && PLUGDIRS+=("$(basename "$d")")
+done
+case "${#PLUGDIRS[@]}" in
+    0) PLUGNAME="autotask-plugin" ;;                    # first install
+    1) PLUGNAME="${PLUGDIRS[0]}" ;;                     # update in place
+    *) echo "!! Multiple Autotask plugin folders found: ${PLUGDIRS[*]}"
+       echo "!! Keep only the installed one (Admin Panel -> Manage -> Plugins) and re-run."
+       exit 1 ;;
+esac
+echo "==> plugin folder: include/plugins/$PLUGNAME"
+mkdir -p "$DEST/include/plugins/$PLUGNAME"
 if command -v rsync >/dev/null 2>&1; then
     rsync -a --delete --exclude '.git' --exclude 'logs/*.log' \
-        "$SRC/include/plugins/autotask-plugin/" "$DEST/include/plugins/autotask-plugin/"
+        "$SRC/include/plugins/autotask-plugin/" "$DEST/include/plugins/$PLUGNAME/"
 else
-    cp -r "$SRC/include/plugins/autotask-plugin/." "$DEST/include/plugins/autotask-plugin/"
+    cp -r "$SRC/include/plugins/autotask-plugin/." "$DEST/include/plugins/$PLUGNAME/"
 fi
 
 # --- 2. webroot endpoints (these never update themselves) ------------------
@@ -74,7 +94,7 @@ echo "==> files deployed"
 PHP_BIN="$(command -v php || echo /usr/bin/php)"
 if [ -x "$PHP_BIN" ]; then
     echo "==> selftest"
-    "$PHP_BIN" "$DEST/include/plugins/autotask-plugin/selftest.php" || {
+    "$PHP_BIN" "$DEST/include/plugins/$PLUGNAME/selftest.php" || {
         echo "!! selftest FAILED — restore with:  cp -r $BACKUP/* $DEST/"; exit 1; }
 else
     echo "(php CLI not found — run selftest.php manually)"
