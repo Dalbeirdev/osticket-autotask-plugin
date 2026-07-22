@@ -174,10 +174,10 @@ header('Cache-Control: no-cache');
     function removeAll() {
         var xs = document.querySelectorAll('.at-panel');
         for (var i = 0; i < xs.length; i++) if (xs[i].parentNode) xs[i].parentNode.removeChild(xs[i]);
-        // The collapse bar goes with them, so un-hide the header it controlled
-        // — otherwise a re-init could leave it hidden with no way to open it.
-        var info = document.querySelector('table.ticket_info');
-        if (info) { info.style.display = ''; }
+        // The collapse bar goes with them, so un-hide every header table it
+        // controlled — a re-init must never leave them stuck hidden.
+        var infos = document.querySelectorAll('table.ticket_info');
+        for (var j = 0; j < infos.length; j++) { infos[j].style.display = ''; }
     }
     function init() {
         addNav();
@@ -377,12 +377,16 @@ header('Cache-Control: no-cache');
        those fields, and the panel + Details popup already show them. A slim
        bar keeps the essentials visible and remembers each agent's choice. */
     function collapseInfo(ctx) {
-        var tbl = document.querySelector('table.ticket_info');
+        // osTicket splits the header across SEVERAL .ticket_info tables
+        // (main fields, assignment/SLA/dates, custom data) — hide them all,
+        // otherwise half the block stays on screen.
+        var tbls = document.querySelectorAll('table.ticket_info');
+        var tbl = tbls[0];
         if (!tbl || document.getElementById('at-info-toggle')) { return; }
         var cell = function (label) {
             var out = '';
             try {
-                var cs = tbl.querySelectorAll('th,td');
+                var cs = document.querySelectorAll('table.ticket_info th, table.ticket_info td');
                 for (var i = 0; i < cs.length && !out; i++) {
                     var t = (cs[i].textContent || '').trim().replace(/:$/, '');
                     if (t.toLowerCase() === label.toLowerCase()) {
@@ -414,7 +418,7 @@ header('Cache-Control: no-cache');
 
         var link = bar.querySelector('.at-info-x');
         var apply = function (open) {
-            tbl.style.display = open ? '' : 'none';
+            for (var i = 0; i < tbls.length; i++) { tbls[i].style.display = open ? '' : 'none'; }
             link.innerHTML = open ? '&#9652; Hide details' : '&#9662; Ticket details';
         };
         var saved = null;
