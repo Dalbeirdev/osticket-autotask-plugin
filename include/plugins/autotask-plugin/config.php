@@ -194,6 +194,15 @@ class AutotaskPluginConfig extends PluginConfig
                                 . 'replies in Autotask, the From / Recipients / Reply-To block is hidden, and '
                                 . 'replies post as "Do Not Email Reply" so no second email goes out.')),
             )),
+            'default_internal_note' => new \BooleanField(array(
+                'id'            => 'default_internal_note',
+                'label'         => $__('Open "Post Internal Note" first'),
+                'default'       => true,
+                'configuration' => array('desc' => $__('TICK = the Internal Note tab is selected when a synced '
+                                . 'ticket opens (agents mostly log internal work). UNTICKED = osTicket\'s '
+                                . 'normal behaviour, Post Reply first. Replies are still one click away — and '
+                                . 'they are what the client sees in Autotask.')),
+            )),
             'hide_sla_view' => new \BooleanField(array(
                 'id'            => 'hide_sla_view',
                 'label'         => $__('Hide osTicket\'s "SLA Plan" row'),

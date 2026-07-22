@@ -250,6 +250,7 @@ class Autotask
             'has_contract'           => !empty($atCtx['details']['contract']),
             'hide_sla'               => $this->c->settings()->hideSlaView(),
             'email_customer'         => $this->c->settings()->emailCustomerReplies(),
+            'default_note_tab'       => $this->c->settings()->defaultInternalNote(),
             'mapped'                 => true,
             'client_code'            => $inst ? $inst->code() : '',
             'client_name'            => $inst ? $inst->name() : '',

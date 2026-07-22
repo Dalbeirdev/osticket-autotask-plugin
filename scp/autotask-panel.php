@@ -187,6 +187,17 @@ header('Cache-Control: no-cache');
                 var no = document.querySelector('textarea[name="note"]'); if (no && no.closest) forms.push(no.closest('form'));
                 if (ctx.mapped) {
                     forms.forEach(function (f) { if (f && !f.querySelector('.at-panel')) buildWidget(TID, ctx, f); });
+                    // Open the Internal Note tab first (config toggle): most
+                    // work on a synced ticket is internal. Never steal the tab
+                    // when osTicket re-rendered the form with an error on it.
+                    if (ctx.default_note_tab) {
+                        var tabs = document.getElementById('response-tabs');
+                        var noteTab = document.getElementById('post-note-tab');
+                        if (tabs && noteTab && !tabs.querySelector('li.error')) {
+                            var li = noteTab.closest ? noteTab.closest('li') : null;
+                            if (li && li.className.indexOf('active') === -1) { noteTab.click(); }
+                        }
+                    }
                 } else if (ctx.clients && ctx.clients.length) {
                     // Unmapped ticket: offer the push-to-client strip (once).
                     var f0 = forms[0];

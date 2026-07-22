@@ -152,6 +152,13 @@ class Settings
         return (bool) $this->config->get('email_customer_replies');
     }
 
+    /** Select the Internal Note tab when a synced ticket opens (default: yes). */
+    public function defaultInternalNote(): bool
+    {
+        $v = $this->config->get('default_internal_note');
+        return $v === null ? true : (bool) $v;
+    }
+
     public function timeFieldNames(): array
     {
         return array(
