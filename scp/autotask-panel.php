@@ -357,65 +357,129 @@ header('Cache-Control: no-cache');
             if (document.querySelector('.at-detail')) { return; }
             var d = ctx.details || {};
             var has = Object.keys(d).some(function (k) { return d[k] !== null && d[k] !== '' && d[k] !== 0; });
-            var CARD = 'background:#fff;border:1px solid #dfe6ec;border-radius:10px;box-shadow:0 1px 4px rgba(16,21,27,.06);font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;font-size:12px;color:#2b2f33;overflow:hidden';
-            var HEAD = 'background:linear-gradient(180deg,#f7fafc,#eef3f8);border-bottom:1px solid #dfe6ec;padding:8px 12px;font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#51606e';
+            var CARD = 'background:#fff;border:1px solid #e3e9ef;border-radius:12px;'
+                + 'box-shadow:0 4px 14px rgba(16,21,27,.08),0 1px 2px rgba(16,21,27,.04);'
+                + 'font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;font-size:12px;color:#28313a;overflow:hidden';
+            var HEAD = 'background:linear-gradient(135deg,#1f6feb,#1858c0);color:#fff;padding:9px 12px;'
+                + 'font-weight:700;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;'
+                + 'display:flex;align-items:center;gap:6px';
+            var SECT = 'padding:7px 12px 3px;color:#9aa4ae;font-size:9.5px;font-weight:700;'
+                + 'letter-spacing:.1em;text-transform:uppercase;background:#fbfcfd;border-bottom:1px solid #eef2f6';
             var fmtDate = function (s) { if (!s) return null; var t = new Date(s); return isNaN(t) ? s : t.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' }); };
-            var row = function (k, v) {
+            /* compact two-column row: label left, value right */
+            var row = function (k, v, opts) {
                 if (v === null || v === undefined || v === '' || v === 0) return '';
-                return '<div style="padding:6px 12px;border-bottom:1px solid #f2f5f8">'
-                    + '<div style="color:#8a949e;font-size:10px;text-transform:uppercase;letter-spacing:.05em">' + esc(k) + '</div>'
-                    + '<div style="margin-top:1px;font-weight:600">' + esc(String(v)) + '</div></div>';
+                opts = opts || {};
+                var val = opts.html ? v : esc(String(v));
+                // Long unbreakable values (emails) get their own line instead
+                // of being hyphenated into a narrow right column.
+                if (opts.full) {
+                    return '<div style="padding:5px 12px;border-bottom:1px solid #f4f7fa">'
+                        + '<div style="color:#8a949e;font-size:10.5px;line-height:1.35">' + esc(k) + '</div>'
+                        + '<div style="font-size:11px;color:#51606e;overflow-wrap:anywhere;line-height:1.35">' + val + '</div></div>';
+                }
+                return '<div style="display:flex;gap:10px;align-items:baseline;padding:5px 12px;border-bottom:1px solid #f4f7fa">'
+                    + '<div style="color:#8a949e;font-size:10.5px;flex:0 0 38%;line-height:1.35">' + esc(k) + '</div>'
+                    + '<div style="flex:1;text-align:right;font-weight:600;line-height:1.35;overflow-wrap:anywhere;'
+                    + (opts.small ? 'font-size:11px;font-weight:500;color:#51606e' : '') + '">'
+                    + val + '</div></div>';
             };
+            var chip = function (text, bg, fg) {
+                return '<span style="display:inline-block;padding:2px 9px;border-radius:20px;font-size:10.5px;'
+                    + 'font-weight:700;background:' + bg + ';color:' + fg + '">' + esc(text) + '</span>';
+            };
+            var prioChip = function (p) {
+                var k = String(p || '').toLowerCase();
+                var c = k.indexOf('critical') === 0 || k.indexOf('emergency') === 0 ? ['#fdecea', '#b3261e']
+                      : k.indexOf('high') === 0   ? ['#fff1e3', '#a8560a']
+                      : k.indexOf('low') === 0    ? ['#eef7ee', '#2f6b34']
+                      : ['#eef3fb', '#1a4f9c'];
+                return chip(p, c[0], c[1]);
+            };
+            var issue = [d.issue_type, d.sub_issue].filter(Boolean).join(' › ');
             var infoRows =
-                  row('Organization', ctx.company)
-                + row('Contact', ctx.contact ? ctx.contact + (ctx.contact_email ? ' · ' + ctx.contact_email : '') : null)
-                + row('Status', d.status) + row('Priority', d.priority)
-                + row('Issue Type', d.issue_type) + row('Sub-Issue Type', d.sub_issue)
+                  '<div style="' + SECT + '">Client</div>'
+                + row('Organization', ctx.company)
+                + row('Contact', ctx.contact)
+                + row('Email', ctx.contact_email, { full: true })
+                + '<div style="' + SECT + '">Ticket</div>'
+                + row('Status', d.status ? chip(d.status, '#eaf1fd', '#1a4f9c') : null, { html: true })
+                + row('Priority', d.priority ? prioChip(d.priority) : null, { html: true })
+                + row('Issue', issue)
                 + row('Source', d.source) + row('SLA', d.sla)
-                + row('Created', fmtDate(d.created)) + row('Due Date', fmtDate(d.due))
-                + row('Queue', d.queue) + row('Primary Resource', d.resource)
-                + row('Role', d.role) + row('Work Type', d.work_type)
-                + row('Contract', d.contract);
+                + row('Created', fmtDate(d.created)) + row('Due', fmtDate(d.due))
+                + '<div style="' + SECT + '">Assignment &amp; billing</div>'
+                + row('Queue', d.queue)
+                + row('Resource', d.resource) + row('Role', d.role)
+                + row('Work type', d.work_type)
+                + row('Contract', d.contract || '— none —');
             var worked = parseFloat(ctx.worked_hours || 0) || 0;
             var est = parseFloat(d.estimated || 0) || 0;
             var over = est > 0 && worked > est;
+            var pct = est > 0 ? Math.min(100, Math.round(worked / est * 100)) : 0;
             var tsBody =
-                  '<div style="display:flex;text-align:center">'
-                + '<div style="flex:1;padding:14px 6px 12px;border-right:1px solid #f2f5f8">'
-                +   '<div style="font-size:19px;font-weight:800;color:' + (over ? '#c0392b' : '#1f6feb') + '">' + esc(hm(worked)) + '</div>'
-                +   '<div style="color:#8a949e;font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-top:2px">Worked</div></div>'
-                + '<div style="flex:1;padding:14px 6px 12px">'
-                +   '<div style="font-size:19px;font-weight:800;color:#2b2f33">' + esc(hm(est)) + '</div>'
-                +   '<div style="color:#8a949e;font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-top:2px">Estimated</div></div>'
+                  '<div style="display:flex;text-align:center;padding:12px 4px 10px">'
+                + '<div style="flex:1;border-right:1px solid #f0f4f8">'
+                +   '<div style="font-size:21px;font-weight:800;letter-spacing:-.02em;color:' + (over ? '#b3261e' : '#1f6feb') + '">' + esc(hm(worked)) + '</div>'
+                +   '<div style="color:#9aa4ae;font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;margin-top:3px">Worked</div></div>'
+                + '<div style="flex:1">'
+                +   '<div style="font-size:21px;font-weight:800;letter-spacing:-.02em;color:#5b6773">' + esc(hm(est)) + '</div>'
+                +   '<div style="color:#9aa4ae;font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;margin-top:3px">Estimated</div></div>'
                 + '</div>'
-                + (over ? '<div style="padding:6px 12px;background:#fdf1f0;color:#c0392b;font-size:11px;border-top:1px solid #f4d7d4">&#9888; Worked exceeds estimate</div>' : '')
-                + (!ctx.has_contract ? '<div style="padding:6px 12px;background:#fff8e6;color:#8a6d1f;font-size:11px;border-top:1px solid #f2e3bd">'
-                    + '&#9888; No contract &mdash; Autotask bills this ticket as non-billable</div>' : '');
+                + (est > 0
+                    ? '<div style="padding:0 12px 11px"><div style="height:5px;border-radius:3px;background:#eef2f6;overflow:hidden">'
+                      + '<div style="height:100%;width:' + pct + '%;background:' + (over ? '#b3261e' : '#1f6feb') + '"></div></div>'
+                      + '<div style="text-align:right;color:#9aa4ae;font-size:9.5px;margin-top:3px">' + pct + '% of estimate</div></div>'
+                    : '')
+                + (over ? '<div style="padding:7px 12px;background:#fdecea;color:#b3261e;font-size:11px;border-top:1px solid #f7d9d6">&#9888; Worked exceeds estimate</div>' : '')
+                + (!ctx.has_contract ? '<div style="padding:7px 12px;background:#fff8e6;color:#8a6d1f;font-size:11px;border-top:1px solid #f4e6c0;line-height:1.4">'
+                    + '&#9888; <strong>No contract</strong> &mdash; Autotask bills this ticket as non-billable</div>' : '');
+            var tsFooter =
+                  '<a href="#" class="at-history" style="display:block;padding:8px 12px;border-top:1px solid #f0f4f8;'
+                + 'background:#fbfcfd;color:#1f6feb;font-weight:600;font-size:11px;text-decoration:none">'
+                + '&#9201; View all time entries &rarr;</a>';
+            var headBar = function (icon, title) {
+                return '<div style="' + HEAD + '"><span>' + icon + '</span><span>' + title + '</span>'
+                    + (ctx.client_code ? '<span style="margin-left:auto;background:rgba(255,255,255,.22);border-radius:5px;'
+                        + 'padding:1px 7px;font-size:9.5px;letter-spacing:.05em">' + esc(ctx.client_code) + '</span>' : '')
+                    + '</div>';
+            };
+            var ticketLine =
+                  '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid #eef2f6;background:#fbfcfd">'
+                + '<span style="font-weight:700;font-size:11.5px">#' + esc(ctx.autotask_ticket_number || '') + '</span>'
+                + (ctx.deep_link ? '<a href="' + esc(ctx.deep_link) + '" target="_blank" rel="noopener" class="no-pjax at-open" '
+                    + 'style="margin-left:auto;color:#1f6feb;font-weight:600;font-size:11px;text-decoration:none">Open &#8599;</a>' : '')
+                + '</div>';
+
             if (window.innerWidth >= 1500 && has) {
                 var left = document.createElement('div');
                 // .at-panel so removeAll() clears it on PJAX re-init — an
                 // untagged card would survive and the next render adds a
                 // second copy.
                 left.className = 'at-panel at-detail';
-                left.style.cssText = CARD + ';position:fixed;left:14px;top:120px;width:225px;max-height:72vh;overflow:auto;z-index:90';
-                left.innerHTML = '<div style="' + HEAD + '">&#128203; Autotask Ticket</div>' + infoRows;
+                left.style.cssText = CARD + ';position:fixed;left:16px;top:108px;width:246px;max-height:78vh;overflow:auto;z-index:90';
+                left.innerHTML = headBar('&#128203;', 'Autotask Ticket') + ticketLine + infoRows;
                 document.body.appendChild(left);
                 var right = document.createElement('div');
                 right.className = 'at-panel at-detail';
-                right.style.cssText = CARD + ';position:fixed;right:14px;top:120px;width:215px;z-index:90';
-                right.innerHTML = '<div style="' + HEAD + '">&#9201; Time Summary</div>' + tsBody
-                    + '<div style="padding:8px 12px;border-top:1px solid #f2f5f8;font-size:10.5px;color:#8a949e">Live from Autotask #' + esc(ctx.autotask_ticket_number || '') + '</div>';
+                right.style.cssText = CARD + ';position:fixed;right:16px;top:108px;width:232px;z-index:90';
+                right.innerHTML = headBar('&#9201;', 'Time Summary') + tsBody + tsFooter;
                 document.body.appendChild(right);
             } else if (has) {
                 var inln = document.createElement('div');
                 inln.className = 'at-panel at-detail';
                 inln.style.cssText = CARD + ';margin:10px 0';
-                var grid = infoRows.split('</div></div>').filter(Boolean).map(function (s) { return s + '</div></div>'; });
-                inln.innerHTML = '<div style="' + HEAD + '">&#128203; Autotask Ticket &nbsp;&middot;&nbsp; &#9201; '
-                    + esc(hm(worked)) + ' worked / ' + esc(hm(est)) + ' estimated</div>'
-                    + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr))">' + grid.join('') + '</div>';
+                inln.innerHTML = headBar('&#128203;', 'Autotask Ticket')
+                    + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))">'
+                    +   '<div style="border-right:1px solid #f0f4f8">' + ticketLine + infoRows + '</div>'
+                    +   '<div>' + tsBody + tsFooter + '</div>'
+                    + '</div>';
                 box.parentNode.insertBefore(inln, box.nextSibling);
             }
+            /* the popup link works on every copy of the card */
+            document.querySelectorAll('.at-detail .at-history').forEach(function (a) {
+                a.onclick = function (e) { e.preventDefault(); showHistory(ctx); };
+            });
         })();
 
         // Auto-select the reply form's Time Type from the Autotask ticket's
