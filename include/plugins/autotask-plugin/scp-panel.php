@@ -39,7 +39,22 @@ $canAccess = function ($tid) use ($thisstaff) {
 if ($action === 'context') {
     $tid = (int) ($_GET['ticket'] ?? 0);
     if (!$tid || !$canAccess($tid)) $json(array('mapped' => false));
-    $json($facadeFor($tid)->panelContext($tid));
+    $ctx = $facadeFor($tid)->panelContext($tid);
+    // Closing also needs the agent's ROLE in this ticket's DEPARTMENT to carry
+    // the Close permission (osTicket: Ticket::getRole -> Staff::getRole(dept,
+    // assigned)). That is per department, which is why the closed statuses can
+    // be missing on some tickets and present on others.
+    try {
+        $t = \Ticket::lookup($tid);
+        if ($t) {
+            $role = $t->getRole($thisstaff);
+            $ctx['can_close']  = $role ? (bool) $role->hasPerm(\Ticket::PERM_CLOSE) : false;
+            $ctx['dept_name']  = ($d = $t->getDept()) ? (string) $d->getName() : '';
+        }
+    } catch (\Throwable $e) {
+        // diagnostics only — never block the panel
+    }
+    $json($ctx);
 }
 
 if ($action === 'log_time') {
@@ -498,7 +513,13 @@ header('Cache-Control: no-cache');
                ticket is not closeable — say why, or agents just see them gone. */
             + (ctx.close_block ? '<div style="font-size:11.5px;color:#8a6d1f;background:#fff8e6;border:1px solid #f4e6c0;'
                 + 'border-radius:6px;margin-top:8px;padding:7px 10px;line-height:1.45">&#9888; <strong>Cannot be closed yet:</strong> '
-                + esc(ctx.close_block) + ' &mdash; that is why <em>Complete / Closed</em> are missing from the Ticket Status list.</div>' : '')
+                + esc(ctx.close_block) + ' &mdash; that is why <em>Complete / Closed</em> are missing from the Ticket Status list.</div>'
+              : (ctx.can_close === false
+                ? '<div style="font-size:11.5px;color:#8a6d1f;background:#fff8e6;border:1px solid #f4e6c0;'
+                  + 'border-radius:6px;margin-top:8px;padding:7px 10px;line-height:1.45">&#9888; <strong>You cannot close this ticket:</strong> '
+                  + 'your role in the <strong>' + esc(ctx.dept_name || 'this') + '</strong> department has no <em>Close Tickets</em> '
+                  + 'permission, so <em>Complete / Closed</em> are hidden. Fix in Admin Panel &rarr; Agents &rarr; Roles.</div>'
+                : ''))
             + '</div>';
         var btn = form.querySelector('[type="submit"]');
         if (btn && btn.parentNode) btn.parentNode.insertBefore(box, btn); else form.appendChild(box);
