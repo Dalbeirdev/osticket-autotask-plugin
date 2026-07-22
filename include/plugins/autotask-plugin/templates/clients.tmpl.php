@@ -98,6 +98,25 @@ $chk = static function (string $key, bool $default = false) use ($icfg): string 
                 <div class="at-client-actions">
                     <a class="at-btn at-btn-sm at-btn-ghost" href="autotask.php?view=clients&amp;mode=tickets&amp;id=<?= $c->id() ?>">Tickets</a>
                     <a class="at-btn at-btn-sm at-btn-ghost" href="autotask.php?instance=<?= $c->id() ?>">Dashboard</a>
+                    <?php
+                    // Sync ownership: warn when another install (e.g. a dev copy
+                    // restored from this database) already syncs this client.
+                    $ownedElsewhere = false;
+                    try {
+                        $ownedElsewhere = $facade->container()->plugin()->getContainerFor($c->id())
+                            ->settings()->syncOwnedElsewhere();
+                    } catch (\Throwable $e0) { $ownedElsewhere = false; }
+                    if ($ownedElsewhere): ?>
+                        <span class="at-muted" style="color:#8a6d1f;background:#fff8e6;border:1px solid #f4e6c0;border-radius:5px;padding:2px 8px">
+                            &#9888; synced by another install</span>
+                        <form method="post" class="at-inline">
+                            <input type="hidden" name="__CSRFToken__" value="<?= $e($csrfToken) ?>">
+                            <input type="hidden" name="action" value="claim_sync">
+                            <input type="hidden" name="client_id" value="<?= $c->id() ?>">
+                            <button type="submit" class="at-btn at-btn-sm at-btn-warn"
+                                onclick="return confirm('Take over syncing for this client on THIS server? The other installation will stop syncing it.');">Take over sync</button>
+                        </form>
+                    <?php endif; ?>
                     <form method="post" class="at-inline">
                         <input type="hidden" name="__CSRFToken__" value="<?= $e($csrfToken) ?>">
                         <input type="hidden" name="action" value="sync_client">

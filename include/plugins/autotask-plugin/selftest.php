@@ -53,6 +53,26 @@ $res = db_query('SELECT COUNT(*) c FROM ' . TABLE_PREFIX . 'autotask_migrations'
 $mig = ($res && ($r = db_fetch_array($res))) ? (int) $r['c'] : 0;
 t_check($mig >= 6, "Migrations applied ($mig >= 6)");
 
+// Core osTicket tables the integration leans on. A restore that loses one of
+// these fails in confusing ways (a missing help_topic_form fatals every
+// ticket page through Ticket::isCloseable()), so name them explicitly.
+$missingCore = array();
+foreach (array('ticket', 'thread', 'thread_entry', 'help_topic', 'help_topic_form',
+               'ticket_status', 'ticket_priority', 'department', 'staff', 'list', 'list_items') as $core) {
+    $r0 = db_query("SHOW TABLES LIKE " . db_input(TABLE_PREFIX . $core), false);
+    if (!$r0 || !db_num_rows($r0)) { $missingCore[] = TABLE_PREFIX . $core; }
+}
+t_check(!$missingCore, 'Core osTicket tables present'
+    . ($missingCore ? ' — MISSING: ' . implode(', ', $missingCore) : ''));
+
+// Reply-form time fields (core time-tracking mod) — without them inline time
+// capture silently records nothing.
+$timeCols = array();
+$r0 = db_query('SHOW COLUMNS FROM ' . TABLE_PREFIX . 'thread_entry', false);
+while ($r0 && ($x0 = db_fetch_array($r0))) { $timeCols[$x0['Field']] = true; }
+t_check(isset($timeCols['time_spent']) && isset($timeCols['time_type']),
+    'thread_entry has the time-tracking columns (core mod installed)');
+
 /* ----- L2 Configuration (per client) --------------------------------------- */
 $repo = new \Autotask\InstanceRepository();
 $instances = $repo->all();
@@ -104,6 +124,20 @@ foreach ($instances as $inst) {
         $rd = db_query('SELECT 1 FROM ' . TABLE_PREFIX . 'department WHERE id=' . $dep);
         t_check((bool) ($rd && db_num_rows($rd)), "$tag fallback department #$dep exists");
     } else { t_skip("$tag no fallback department (system default will be used)"); }
+
+    // Only ONE installation may sync a client: a dev copy restored from the
+    // live database would push its stale state into the client's Autotask.
+    $set = $c->settings();
+    t_check(!$set->syncOwnedElsewhere(),
+        "$tag synced by this installation only",
+        'owned by install ' . $set->syncOwner() . ', this one is ' . \Autotask\Settings::installFingerprint());
+
+    // Imported tickets need a help topic when osTicket requires one to close.
+    global $cfg;
+    if ($cfg && $cfg->requireTopicToClose()) {
+        t_check($set->importHelpTopicId() > 0,
+            "$tag help topic set for imports (osTicket requires one to close)");
+    }
 }
 
 /* ----- L3 Data integrity ---------------------------------------------------- */

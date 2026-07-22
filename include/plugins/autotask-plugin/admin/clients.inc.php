@@ -274,12 +274,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                     break;
 
+                case 'claim_sync':
+                    // Move sync ownership to THIS installation (used when a
+                    // client is migrated between servers).
+                    if ($id && ($inst = $repo->find($id))) {
+                        $facade->container()->plugin()->getContainerFor($id)->settings()->claimSyncOwner();
+                        $notice = htmlspecialchars($inst->code()) . ' is now synced by this server.';
+                    }
+                    break;
+
                 case 'sync_client':
                     // Per-client "Sync Now": incremental run for this tenant only.
                     if ($id && ($inst = $repo->find($id))) {
                         $pluginRef = $facade->container()->plugin();
                         $c = $pluginRef->getContainerFor($id);
                         $r = $c->scheduler()->runIncremental();
+                        if (isset($r['skipped'])) {
+                            $error = htmlspecialchars($inst->code()) . ' is synced by another osTicket installation. '
+                                . 'Click "Take over sync" if this server should own it.';
+                            break;
+                        }
                         $repo->touchSync($id, ((int) $r['queue']['failed']) === 0);
                         $notice = sprintf('Sync for %s: processed %d, failed %d, pulled %d.',
                             htmlspecialchars($inst->code()),

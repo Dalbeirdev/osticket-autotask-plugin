@@ -117,6 +117,17 @@ class Scheduler
      */
     public function runIncremental(): array
     {
+        // One install per client. A dev copy restored from the live database
+        // holds the same mappings and would push its own (stale) state into
+        // the client's Autotask, silently undoing live work.
+        if ($this->settings->syncOwnedElsewhere()) {
+            $this->logger->warning('Sync skipped: this client is owned by another osTicket installation ('
+                . $this->settings->syncOwner() . '). Use "Take over sync" on the Clients page if this server '
+                . 'should own it, or disable the client here.', array('category' => 'scheduler'));
+            return array('processed' => 0, 'failed' => 0, 'pulled' => 0, 'skipped' => 'not-owner');
+        }
+        $this->settings->claimSyncOwner();
+
         // Produce inbound jobs first, then drain the whole queue (both directions).
         $pulled = $this->sync->inboundSync();
         $q = $this->processQueue($this->settings->batchSize());

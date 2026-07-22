@@ -355,6 +355,40 @@ class Settings
         return (int) $this->config->get('department_id');
     }
 
+    /* ----- Sync ownership (one install per client) ----------------------- */
+
+    /**
+     * Fingerprint of THIS osTicket installation. Two installs that share a
+     * restored database (dev copy + live server) still differ by host and
+     * path, which is exactly the pair that must never sync one client at the
+     * same time — they would overwrite each other in Autotask.
+     */
+    public static function installFingerprint(): string
+    {
+        $host = function_exists('gethostname') ? (string) gethostname() : (string) php_uname('n');
+        $root = defined('INCLUDE_DIR') ? (string) INCLUDE_DIR : __DIR__;
+        return substr(sha1($host . '|' . str_replace('\\', '/', $root)), 0, 16);
+    }
+
+    /** Install that currently owns syncing for this client ('' = unclaimed). */
+    public function syncOwner(): string
+    {
+        return (string) ($this->state('sync_owner') ?: '');
+    }
+
+    /** Record this install as the owner (first run claims it automatically). */
+    public function claimSyncOwner(): void
+    {
+        $this->setState('sync_owner', self::installFingerprint());
+    }
+
+    /** True when another installation is already syncing this client. */
+    public function syncOwnedElsewhere(): bool
+    {
+        $owner = $this->syncOwner();
+        return $owner !== '' && $owner !== self::installFingerprint();
+    }
+
     /**
      * Help topic stamped on imported tickets (0 = none). Autotask has no
      * equivalent field, and osTicket can refuse to close a ticket that has
