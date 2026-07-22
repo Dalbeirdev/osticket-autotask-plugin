@@ -87,6 +87,7 @@ $optionTypes = array(
     'import_queue_ids'           => 'csv',
     'import_resource_ids'        => 'csv',
     'import_since_days'          => 'int',
+    'import_help_topic'          => 'int',
     'default_work_type_id'       => 'int',
     'default_resource_id'        => 'int',
     'default_role_id'            => 'int',
@@ -392,6 +393,18 @@ if ($mode === 'edit' && $editing) {
 $departments = array();
 if (class_exists('Dept') && method_exists('Dept', 'getDepartments')) {
     $departments = \Dept::getDepartments();
+}
+
+// Help topics for imported tickets (id => name). osTicket refuses to close a
+// ticket without a topic when "Require Help Topic to Close" is on, and
+// Autotask has no equivalent field — so imports get one from here.
+$helpTopics = array();
+if (class_exists('Topic') && method_exists('Topic', 'getHelpTopics')) {
+    try {
+        $helpTopics = \Topic::getHelpTopics(false, true);
+    } catch (\Throwable $e) {
+        $helpTopics = array();
+    }
 }
 
 // Mapped-ticket counts per instance for the list cards.

@@ -756,6 +756,12 @@ class SyncEngine
         if ($deptId > 0) {
             $vars['deptId'] = $deptId;
         }
+        // Help topic: Autotask has none, but osTicket can refuse to CLOSE a
+        // ticket without one, so stamp the client's configured topic.
+        $topicId = $this->settings->importHelpTopicId();
+        if ($topicId > 0) {
+            $vars['topicId'] = $topicId;
+        }
 
         $errors = array();
         self::$suppress = true;

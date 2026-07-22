@@ -330,6 +330,14 @@ $chk = static function (string $key, bool $default = false) use ($icfg): string 
                     <input type="text" name="o_import_resource_ids" class="at-fld" value="<?= $e($opt('import_resource_ids')) ?>"></div>
                 <div><label class="at-lbl">Only tickets active in the last N days <span class="at-muted">(recommend 7 for a new client)</span></label>
                     <input type="number" name="o_import_since_days" min="0" max="3650" class="at-fld" value="<?= $e($opt('import_since_days', 7)) ?>"></div>
+                <div><label class="at-lbl">Help Topic for imported tickets
+                        <span class="at-muted">(Autotask has no Help Topic; osTicket can refuse to close a ticket without one)</span></label>
+                    <select name="o_import_help_topic" class="at-fld">
+                        <option value="">&mdash; None &mdash;</option>
+                        <?php foreach (($helpTopics ?? array()) as $tId => $tName): ?>
+                            <option value="<?= (int) $tId ?>" <?= (int) $opt('import_help_topic') === (int) $tId ? 'selected' : '' ?>><?= $e($tName) ?></option>
+                        <?php endforeach; ?>
+                    </select></div>
             </div>
             <?php if (!empty($refQueues) || !empty($refResources) || !empty($refCompanies)): ?>
             <div style="margin-top:14px;padding-top:12px;border-top:1px dashed #e4e8ec">

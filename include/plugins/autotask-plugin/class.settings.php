@@ -356,6 +356,16 @@ class Settings
     }
 
     /**
+     * Help topic stamped on imported tickets (0 = none). Autotask has no
+     * equivalent field, and osTicket can refuse to close a ticket that has
+     * no topic ("Require Help Topic to Close").
+     */
+    public function importHelpTopicId(): int
+    {
+        return (int) $this->config->get('import_help_topic');
+    }
+
+    /**
      * Queue->department routing rules ("queueId=deptId" lines).
      *
      * @return array<int,int> Autotask queue id => osTicket department id.
