@@ -352,6 +352,9 @@ header('Cache-Control: no-cache');
         // (Time Summary) of the centred page. Narrow screens: one inline
         // card under the blue strip.
         (function renderDetails() {
+            // One card per page: the reply and note forms each build a panel,
+            // but the Autotask detail card must not be duplicated.
+            if (document.querySelector('.at-detail')) { return; }
             var d = ctx.details || {};
             var has = Object.keys(d).some(function (k) { return d[k] !== null && d[k] !== '' && d[k] !== 0; });
             var CARD = 'background:#fff;border:1px solid #dfe6ec;border-radius:10px;box-shadow:0 1px 4px rgba(16,21,27,.06);font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;font-size:12px;color:#2b2f33;overflow:hidden';
@@ -390,16 +393,22 @@ header('Cache-Control: no-cache');
                     + '&#9888; No contract &mdash; Autotask bills this ticket as non-billable</div>' : '');
             if (window.innerWidth >= 1500 && has) {
                 var left = document.createElement('div');
+                // .at-panel so removeAll() clears it on PJAX re-init — an
+                // untagged card would survive and the next render adds a
+                // second copy.
+                left.className = 'at-panel at-detail';
                 left.style.cssText = CARD + ';position:fixed;left:14px;top:120px;width:225px;max-height:72vh;overflow:auto;z-index:90';
                 left.innerHTML = '<div style="' + HEAD + '">&#128203; Autotask Ticket</div>' + infoRows;
                 document.body.appendChild(left);
                 var right = document.createElement('div');
+                right.className = 'at-panel at-detail';
                 right.style.cssText = CARD + ';position:fixed;right:14px;top:120px;width:215px;z-index:90';
                 right.innerHTML = '<div style="' + HEAD + '">&#9201; Time Summary</div>' + tsBody
                     + '<div style="padding:8px 12px;border-top:1px solid #f2f5f8;font-size:10.5px;color:#8a949e">Live from Autotask #' + esc(ctx.autotask_ticket_number || '') + '</div>';
                 document.body.appendChild(right);
             } else if (has) {
                 var inln = document.createElement('div');
+                inln.className = 'at-panel at-detail';
                 inln.style.cssText = CARD + ';margin:10px 0';
                 var grid = infoRows.split('</div></div>').filter(Boolean).map(function (s) { return s + '</div></div>'; });
                 inln.innerHTML = '<div style="' + HEAD + '">&#128203; Autotask Ticket &nbsp;&middot;&nbsp; &#9201; '
