@@ -187,19 +187,20 @@ class AutotaskPluginConfig extends PluginConfig
             /* ---- Inline time capture (reply/note form) ------------------ */
             'email_customer_replies' => new \BooleanField(array(
                 'id'            => 'email_customer_replies',
-                'label'         => $__('Email replies to the customer from osTicket'),
+                'label'         => $__('Direct customer email'),
                 'default'       => false,
-                'configuration' => array('desc' => $__('Leave OFF (recommended): the client reads replies in '
-                                . 'Autotask, so osTicket must not send its own email. The From / Recipients / '
-                                . 'Reply-To block is hidden and replies post as "Do Not Email Reply". '
-                                . 'Tick it only if agents should also email customers directly from osTicket.')),
+                'configuration' => array('desc' => $__('TICK = osTicket also emails the customer directly '
+                                . '(standard osTicket behaviour). UNTICKED = recommended: the client reads '
+                                . 'replies in Autotask, the From / Recipients / Reply-To block is hidden, and '
+                                . 'replies post as "Do Not Email Reply" so no second email goes out.')),
             )),
             'hide_sla_view' => new \BooleanField(array(
                 'id'            => 'hide_sla_view',
-                'label'         => $__('Hide "SLA Plan" on ticket view'),
+                'label'         => $__('Hide osTicket\'s "SLA Plan" row'),
                 'default'       => true,
-                'configuration' => array('desc' => $__('Autotask-synced tickets show the client\'s real SLA '
-                                . 'in the Autotask panel — hide osTicket\'s own SLA Plan row to avoid confusion.')),
+                'configuration' => array('desc' => $__('TICK = hide the SLA Plan row on synced tickets '
+                                . '(recommended: the Autotask panel already shows the client\'s real SLA, and '
+                                . 'two different SLAs on one page confuse agents).')),
             )),
             'timecapture_section' => new \SectionBreakField(array(
                 'label' => $__('Inline Time Capture (Reply / Note form)'),
@@ -436,15 +437,26 @@ class AutotaskPluginConfig extends PluginConfig
             $config['max_retries'] = max(0, min(20, (int) $config['max_retries']));
         }
 
-        // If the integration is being enabled, require + validate credentials.
+        // Multi-tenant (v2): credentials belong to each CLIENT, not to this
+        // page — the legacy fields are not even rendered here any more. Only
+        // block enabling when no client exists at all, and say where to go.
         $enabling = !empty($config['enabled']);
         $haveCreds = !empty($config['api_username'])
             && !empty($config['api_secret'])
             && !empty($config['api_integration_code']);
 
         if ($enabling && !$haveCreds) {
-            $errors['err'] = $__('API Username, Secret and Integration Code are required to enable the integration.');
-            return false;
+            $clients = 0;
+            try {
+                $clients = (new InstanceRepository())->count();
+            } catch (\Throwable $e) {
+                $clients = 0; // schema not ready yet — fall back to the old rule
+            }
+            if (!$clients) {
+                $errors['err'] = $__('Register a client first: Admin Panel → Autotask → Clients → Add Client '
+                    . '(API username, secret and integration code live there, one set per client).');
+                return false;
+            }
         }
 
         // NOTE: we deliberately do NOT make a live Autotask connection test here.
