@@ -375,6 +375,7 @@ header('Cache-Control: no-cache');
                 ? '<div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">'
                     + '<div style="font-size:12px;color:#51606e;flex:1;min-width:240px;line-height:1.5">'
                     + '&#9201; Time &rarr; <strong>Time Spent</strong> fields &nbsp;&middot;&nbsp; Status &rarr; <strong>Ticket Status</strong> dropdown &nbsp;&middot;&nbsp; Close &rarr; ticket <strong>Close</strong> dialog'
+                    + (ctx.email_customer ? '' : '<br>&#9993; Replies reach the client <strong>through Autotask</strong> &mdash; osTicket sends no separate email.')
                     + '</div>'
                     + statusRo(ctx)
                     + '</div>'
@@ -412,6 +413,28 @@ header('Cache-Control: no-cache');
             var t = ed ? (ed.innerText || ed.textContent || '') : '';
             if (!t.trim()) { var ta = form.querySelector('textarea[name="response"],textarea[name="note"]'); if (ta) t = ta.value || ''; }
             return (t || '').replace(/\s+/g, ' ').trim();
+        }
+
+        // No direct email to the customer (config toggle, OFF by default):
+        // the client follows the ticket in Autotask, so osTicket must not send
+        // its own copy. Force osTicket's own "Do Not Email Reply" mode and
+        // hide the From / Recipients / Reply-To block that goes with it.
+        if (!ctx.email_customer) {
+            var rt = (form.querySelector('select[name="reply-to"]') || document.querySelector('select#reply-to'));
+            if (rt) {
+                var hasNone = false;
+                for (var i = 0; i < rt.options.length; i++) { if (rt.options[i].value === 'none') { hasNone = true; } }
+                if (hasNone) { rt.value = 'none'; }   // core: $emailReply = false
+                var rtr = rt.closest ? rt.closest('tr') : null;
+                if (rtr) { rtr.style.display = 'none'; }
+            }
+            var fromSel = document.querySelector('select#emailreply');
+            if (fromSel && fromSel.closest) {
+                var ftr = fromSel.closest('tr');
+                if (ftr) { ftr.style.display = 'none'; }
+            }
+            var recip = document.getElementById('recipients');
+            if (recip) { recip.style.display = 'none'; }
         }
 
         // Hide osTicket's own "SLA Plan" row (config toggle): the Autotask

@@ -185,6 +185,15 @@ class AutotaskPluginConfig extends PluginConfig
             )),
 
             /* ---- Inline time capture (reply/note form) ------------------ */
+            'email_customer_replies' => new \BooleanField(array(
+                'id'            => 'email_customer_replies',
+                'label'         => $__('Email replies to the customer from osTicket'),
+                'default'       => false,
+                'configuration' => array('desc' => $__('Leave OFF (recommended): the client reads replies in '
+                                . 'Autotask, so osTicket must not send its own email. The From / Recipients / '
+                                . 'Reply-To block is hidden and replies post as "Do Not Email Reply". '
+                                . 'Tick it only if agents should also email customers directly from osTicket.')),
+            )),
             'hide_sla_view' => new \BooleanField(array(
                 'id'            => 'hide_sla_view',
                 'label'         => $__('Hide "SLA Plan" on ticket view'),

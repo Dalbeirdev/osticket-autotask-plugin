@@ -249,6 +249,7 @@ class Autotask
             // contract — surface that instead of leaving techs guessing.
             'has_contract'           => !empty($atCtx['details']['contract']),
             'hide_sla'               => $this->c->settings()->hideSlaView(),
+            'email_customer'         => $this->c->settings()->emailCustomerReplies(),
             'mapped'                 => true,
             'client_code'            => $inst ? $inst->code() : '',
             'client_name'            => $inst ? $inst->name() : '',

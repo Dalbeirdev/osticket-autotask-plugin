@@ -32,7 +32,7 @@ class InstanceConfig
     private const GLOBAL_KEYS = array(
         'enabled', 'sync_interval', 'batch_size', 'max_retries',
         'log_level', 'log_retention_days', 'drop_tables_on_uninstall',
-        'hide_sla_view',
+        'hide_sla_view', 'email_customer_replies',
         'capture_time_enabled', 'field_time_spent', 'field_time_type',
         'field_billable', 'time_spent_unit', 'timetype_map',
         'schema_version',

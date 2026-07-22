@@ -142,6 +142,16 @@ class Settings
         return $v === null ? true : (bool) $v;
     }
 
+    /**
+     * May osTicket email replies straight to the customer? Default NO: the
+     * client follows the ticket in Autotask, so a second email from osTicket
+     * would break the "one conversation" rule (and reveal the helpdesk).
+     */
+    public function emailCustomerReplies(): bool
+    {
+        return (bool) $this->config->get('email_customer_replies');
+    }
+
     public function timeFieldNames(): array
     {
         return array(
