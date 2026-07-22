@@ -194,6 +194,15 @@ class AutotaskPluginConfig extends PluginConfig
                                 . 'replies in Autotask, the From / Recipients / Reply-To block is hidden, and '
                                 . 'replies post as "Do Not Email Reply" so no second email goes out.')),
             )),
+            'collapse_ticket_info' => new \BooleanField(array(
+                'id'            => 'collapse_ticket_info',
+                'label'         => $__('Collapse osTicket\'s ticket header'),
+                'default'       => true,
+                'configuration' => array('desc' => $__('TICK = on synced tickets the Status / Priority / '
+                                . 'Department / SLA header block starts collapsed behind a "Ticket details" '
+                                . 'toggle, with a one-line summary kept visible (Autotask is the source of '
+                                . 'truth for those fields). Each agent\'s show/hide choice is remembered.')),
+            )),
             'default_internal_note' => new \BooleanField(array(
                 'id'            => 'default_internal_note',
                 'label'         => $__('Open "Post Internal Note" first'),

@@ -251,6 +251,7 @@ class Autotask
             'hide_sla'               => $this->c->settings()->hideSlaView(),
             'email_customer'         => $this->c->settings()->emailCustomerReplies(),
             'default_note_tab'       => $this->c->settings()->defaultInternalNote(),
+            'collapse_info'          => $this->c->settings()->collapseTicketInfo(),
             'mapped'                 => true,
             'client_code'            => $inst ? $inst->code() : '',
             'client_name'            => $inst ? $inst->name() : '',

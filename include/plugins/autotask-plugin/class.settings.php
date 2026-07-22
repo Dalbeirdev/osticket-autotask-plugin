@@ -152,6 +152,13 @@ class Settings
         return (bool) $this->config->get('email_customer_replies');
     }
 
+    /** Start osTicket's ticket header collapsed on synced tickets (default: yes). */
+    public function collapseTicketInfo(): bool
+    {
+        $v = $this->config->get('collapse_ticket_info');
+        return $v === null ? true : (bool) $v;
+    }
+
     /** Select the Internal Note tab when a synced ticket opens (default: yes). */
     public function defaultInternalNote(): bool
     {

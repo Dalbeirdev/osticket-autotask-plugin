@@ -171,7 +171,14 @@ header('Cache-Control: no-cache');
             + '<span style="font-size:11px;font-weight:600;color:#8a949e;text-transform:uppercase;letter-spacing:.04em">Autotask Status</span>'
             + '<span class="at-status-ro" style="display:inline-block;padding:4px 12px;background:#e8f0fe;border-radius:12px;font-weight:700;font-size:12px;color:#1f6feb">' + esc(statusLabel(ctx)) + '</span></div>';
     }
-    function removeAll() { var xs = document.querySelectorAll('.at-panel'); for (var i = 0; i < xs.length; i++) if (xs[i].parentNode) xs[i].parentNode.removeChild(xs[i]); }
+    function removeAll() {
+        var xs = document.querySelectorAll('.at-panel');
+        for (var i = 0; i < xs.length; i++) if (xs[i].parentNode) xs[i].parentNode.removeChild(xs[i]);
+        // The collapse bar goes with them, so un-hide the header it controlled
+        // — otherwise a re-init could leave it hidden with no way to open it.
+        var info = document.querySelector('table.ticket_info');
+        if (info) { info.style.display = ''; }
+    }
     function init() {
         addNav();
         removeAll();
@@ -190,6 +197,7 @@ header('Cache-Control: no-cache');
                     // Open the Internal Note tab first (config toggle): most
                     // work on a synced ticket is internal. Never steal the tab
                     // when osTicket re-rendered the form with an error on it.
+                    if (ctx.collapse_info) { collapseInfo(ctx); }
                     if (ctx.default_note_tab) {
                         var tabs = document.getElementById('response-tabs');
                         var noteTab = document.getElementById('post-note-tab');
@@ -363,6 +371,61 @@ header('Cache-Control: no-cache');
         if (toTime) { toTime.onclick = function (e) { e.preventDefault(); close(); showHistory(ctx); }; }
         document.addEventListener('keydown', onKey);
         document.body.appendChild(ov);
+    }
+
+    /* Collapse osTicket's own ticket header on synced tickets: Autotask owns
+       those fields, and the panel + Details popup already show them. A slim
+       bar keeps the essentials visible and remembers each agent's choice. */
+    function collapseInfo(ctx) {
+        var tbl = document.querySelector('table.ticket_info');
+        if (!tbl || document.getElementById('at-info-toggle')) { return; }
+        var cell = function (label) {
+            var out = '';
+            try {
+                var cs = tbl.querySelectorAll('th,td');
+                for (var i = 0; i < cs.length && !out; i++) {
+                    var t = (cs[i].textContent || '').trim().replace(/:$/, '');
+                    if (t.toLowerCase() === label.toLowerCase()) {
+                        var n = cs[i].nextElementSibling;
+                        if (n) { out = (n.textContent || '').trim().replace(/\s+/g, ' '); }
+                    }
+                }
+            } catch (e) { /* summary is best-effort */ }
+            return out;
+        };
+        var d = ctx.details || {};
+        var bits = [];
+        var push = function (k, v) { if (v) { bits.push('<span style="color:#8a949e">' + k + '</span> <strong>' + esc(v) + '</strong>'); } };
+        push('Status', d.status || cell('Status'));
+        push('Priority', d.priority || cell('Priority'));
+        push('Assigned', cell('Assigned To'));
+        push('Dept', cell('Department'));
+        push('Time', cell('Time Spent'));
+
+        var bar = document.createElement('div');
+        bar.id = 'at-info-toggle';
+        bar.className = 'at-panel';
+        bar.style.cssText = 'display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:6px 0 10px;'
+            + 'padding:7px 12px;background:#f7fafc;border:1px solid #e3e9ef;border-radius:8px;'
+            + 'font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;font-size:12px;color:#2b2f33';
+        bar.innerHTML = bits.join('<span style="color:#dbe3ea">|</span>')
+            + '<a href="#" class="at-info-x" style="margin-left:auto;color:#1f6feb;font-weight:600;text-decoration:none;white-space:nowrap"></a>';
+        tbl.parentNode.insertBefore(bar, tbl);
+
+        var link = bar.querySelector('.at-info-x');
+        var apply = function (open) {
+            tbl.style.display = open ? '' : 'none';
+            link.innerHTML = open ? '&#9652; Hide details' : '&#9662; Ticket details';
+        };
+        var saved = null;
+        try { saved = window.localStorage ? localStorage.getItem('at_info_open') : null; } catch (e) {}
+        apply(saved === null ? false : saved === '1');
+        link.onclick = function (e) {
+            e.preventDefault();
+            var nowOpen = tbl.style.display === 'none';
+            apply(nowOpen);
+            try { if (window.localStorage) { localStorage.setItem('at_info_open', nowOpen ? '1' : '0'); } } catch (e2) {}
+        };
     }
 
     function buildWidget(TID, ctx, form) {
