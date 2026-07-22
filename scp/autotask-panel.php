@@ -494,6 +494,11 @@ header('Cache-Control: no-cache');
             /* Complete/Close removed: closing happens through osTicket's native
                Close dialog; the status map + auto-resolution complete Autotask. */
             + (ctx.require_time_close ? '<div style="font-size:11px;color:#b8860b;margin-top:8px;padding-top:8px;border-top:1px solid #eef1f4">&#9888; Log time (Time Spent) before closing &mdash; closures without time are flagged in the audit log.</div>' : '')
+            /* osTicket hides Complete/Closed from the status dropdown when the
+               ticket is not closeable — say why, or agents just see them gone. */
+            + (ctx.close_block ? '<div style="font-size:11.5px;color:#8a6d1f;background:#fff8e6;border:1px solid #f4e6c0;'
+                + 'border-radius:6px;margin-top:8px;padding:7px 10px;line-height:1.45">&#9888; <strong>Cannot be closed yet:</strong> '
+                + esc(ctx.close_block) + ' &mdash; that is why <em>Complete / Closed</em> are missing from the Ticket Status list.</div>' : '')
             + '</div>';
         var btn = form.querySelector('[type="submit"]');
         if (btn && btn.parentNode) btn.parentNode.insertBefore(box, btn); else form.appendChild(box);

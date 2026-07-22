@@ -253,6 +253,9 @@ class Autotask
             'default_note_tab'       => $this->c->settings()->defaultInternalNote(),
             'collapse_info'          => $this->c->settings()->collapseTicketInfo(),
             'hide_reply_tab'         => $this->c->settings()->hideReplyTab(),
+            // Why osTicket is refusing to offer the closed statuses. Core
+            // only prints this on the reply form, which agents may not see.
+            'close_block'            => $this->closeBlocker($ostId),
             'mapped'                 => true,
             'client_code'            => $inst ? $inst->code() : '',
             'client_name'            => $inst ? $inst->name() : '',
@@ -275,6 +278,31 @@ class Autotask
             'allow_close_osticket'   => $this->c->settings()->closeOsticketOnComplete(),
             'has_time'               => $this->hasTimeEntry($ostId),
         );
+    }
+
+    /**
+     * osTicket removes the closed statuses from the dropdown when a ticket is
+     * not closeable (missing required fields, open tasks, or no Help Topic
+     * when the "require topic to close" setting is on). Core shows that reason
+     * only on the reply form, so return it for the panel to display.
+     *
+     * @return string|null Reason the ticket cannot be closed, or null.
+     */
+    private function closeBlocker(int $ostId): ?string
+    {
+        try {
+            $t = \Ticket::lookup($ostId);
+            if (!$t || !method_exists($t, 'isCloseable')) {
+                return null;
+            }
+            $r = $t->isCloseable();
+            if (is_string($r) && trim($r) !== '') {
+                return trim(preg_replace('/\s+/', ' ', strip_tags($r)));
+            }
+        } catch (\Throwable $e) {
+            // diagnostics only
+        }
+        return null;
     }
 
     /**
