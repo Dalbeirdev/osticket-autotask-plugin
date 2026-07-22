@@ -94,6 +94,27 @@ Never upload `include/ost-config.php`.
    /usr/bin/php ~/domains/autotask.foxeraclub.com/public_html/include/plugins/autotask-plugin/cron.php
    ```
 
+## Security: delete the `setup/` directory (once, right after install)
+
+osTicket ships its installer at `setup/`. Left in place it answers to anyone —
+`https://<site>/setup/install.php` returning **200** means a stranger can open
+the installer — and the SCP shows a warning banner until it is gone.
+
+```bash
+rm -rf ~/domains/foxeraclub.com/public_html/autotask/setup
+```
+
+Verify (expect **404**):
+
+```bash
+curl -s -o /dev/null -w "%{http_code}\n" https://autotask.foxeraclub.com/setup/install.php
+```
+
+`deploy-live.sh` never recreates it — it copies only the integration's files —
+but a full `git checkout` of this repo into the web root would; re-delete it if
+you ever deploy that way. Checked as already protected on this host (all 403):
+`include/ost-config.php`, `include/`, `.git/`, and the plugin `logs/` folder.
+
 ## After every deploy
 
 1. Migrations apply themselves on the first page load (schema version check).
