@@ -33,7 +33,7 @@ class InstanceConfig
         'enabled', 'sync_interval', 'batch_size', 'max_retries',
         'log_level', 'log_retention_days', 'drop_tables_on_uninstall',
         'hide_sla_view', 'email_customer_replies', 'default_internal_note',
-        'collapse_ticket_info',
+        'collapse_ticket_info', 'hide_reply_tab',
         'capture_time_enabled', 'field_time_spent', 'field_time_type',
         'field_billable', 'time_spent_unit', 'timetype_map',
         'schema_version',

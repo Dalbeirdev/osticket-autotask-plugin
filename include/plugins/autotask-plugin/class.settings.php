@@ -152,6 +152,17 @@ class Settings
         return (bool) $this->config->get('email_customer_replies');
     }
 
+    /**
+     * Hide the "Post Reply" tab (default: yes). Replies are the only
+     * client-visible channel from osTicket, so hiding them means all osTicket
+     * text stays internal and the client is answered from Autotask.
+     */
+    public function hideReplyTab(): bool
+    {
+        $v = $this->config->get('hide_reply_tab');
+        return $v === null ? true : (bool) $v;
+    }
+
     /** Start osTicket's ticket header collapsed on synced tickets (default: yes). */
     public function collapseTicketInfo(): bool
     {

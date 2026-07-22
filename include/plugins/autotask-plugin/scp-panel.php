@@ -198,13 +198,26 @@ header('Cache-Control: no-cache');
                     // work on a synced ticket is internal. Never steal the tab
                     // when osTicket re-rendered the form with an error on it.
                     if (ctx.collapse_info) { collapseInfo(ctx); }
-                    if (ctx.default_note_tab) {
+                    if (ctx.default_note_tab || ctx.hide_reply_tab) {
                         var tabs = document.getElementById('response-tabs');
                         var noteTab = document.getElementById('post-note-tab');
-                        if (tabs && noteTab && !tabs.querySelector('li.error')) {
+                        if (tabs && noteTab && (ctx.hide_reply_tab || !tabs.querySelector('li.error'))) {
                             var li = noteTab.closest ? noteTab.closest('li') : null;
                             if (li && li.className.indexOf('active') === -1) { noteTab.click(); }
                         }
+                    }
+                    // Replies are the only CLIENT-VISIBLE channel from osTicket;
+                    // when they are turned off, remove both ways in (tab and
+                    // the toolbar icon) so nothing lands where the client
+                    // cannot see it by accident.
+                    if (ctx.hide_reply_tab) {
+                        var rTab = document.getElementById('post-reply-tab');
+                        if (rTab && rTab.closest) {
+                            var rLi = rTab.closest('li');
+                            if (rLi) { rLi.style.display = 'none'; }
+                        }
+                        var rBtn = document.querySelector('a.post-response[href="#post-reply"]');
+                        if (rBtn) { rBtn.style.display = 'none'; }
                     }
                 } else if (ctx.clients && ctx.clients.length) {
                     // Unmapped ticket: offer the push-to-client strip (once).

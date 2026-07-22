@@ -252,6 +252,7 @@ class Autotask
             'email_customer'         => $this->c->settings()->emailCustomerReplies(),
             'default_note_tab'       => $this->c->settings()->defaultInternalNote(),
             'collapse_info'          => $this->c->settings()->collapseTicketInfo(),
+            'hide_reply_tab'         => $this->c->settings()->hideReplyTab(),
             'mapped'                 => true,
             'client_code'            => $inst ? $inst->code() : '',
             'client_name'            => $inst ? $inst->name() : '',

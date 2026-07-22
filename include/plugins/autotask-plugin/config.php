@@ -194,6 +194,15 @@ class AutotaskPluginConfig extends PluginConfig
                                 . 'replies in Autotask, the From / Recipients / Reply-To block is hidden, and '
                                 . 'replies post as "Do Not Email Reply" so no second email goes out.')),
             )),
+            'hide_reply_tab' => new \BooleanField(array(
+                'id'            => 'hide_reply_tab',
+                'label'         => $__('Hide the "Post Reply" tab'),
+                'default'       => true,
+                'configuration' => array('desc' => $__('TICK = agents in osTicket only post INTERNAL notes; '
+                                . 'client-visible answers are written in Autotask by the assigned technician. '
+                                . 'UNTICKED = keep Post Reply available — a reply becomes a note the client '
+                                . 'CAN see on the Autotask ticket. Internal notes never reach the client.')),
+            )),
             'collapse_ticket_info' => new \BooleanField(array(
                 'id'            => 'collapse_ticket_info',
                 'label'         => $__('Collapse osTicket\'s ticket header'),
