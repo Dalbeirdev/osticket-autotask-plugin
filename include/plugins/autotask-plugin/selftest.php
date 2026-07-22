@@ -19,11 +19,34 @@
  * @package Autotask Integration
  */
 
-if (PHP_SAPI !== 'cli') { die("CLI only.\n"); }
+if (PHP_SAPI !== 'cli') { die("CLI only (this PHP reports SAPI '" . PHP_SAPI . "').\n"); }
+
+// Progress markers on STDERR: if a host's PHP dies inside osTicket's bootstrap
+// it can swallow STDOUT (an empty "<html></html>" is the usual symptom), and
+// these lines still show exactly how far the run got.
+$step = function (string $s): void { fwrite(STDERR, "[selftest] $s\n"); };
+$step('php ' . PHP_VERSION . ' (' . PHP_SAPI . ')');
 
 $root = realpath(__DIR__ . '/../../../');
-require_once $root . '/main.inc.php';
-require_once __DIR__ . '/bootstrap.php';
+$mainInc = $root . '/main.inc.php';
+if (!is_file($mainInc)) {
+    fwrite(STDERR, "[selftest] FATAL: osTicket main.inc.php not found at $mainInc\n");
+    exit(1);
+}
+$step("booting osTicket from $mainInc");
+require_once $mainInc;
+if (!defined('INCLUDE_DIR')) {
+    fwrite(STDERR, "[selftest] FATAL: osTicket bootstrap did not define INCLUDE_DIR (config/DB problem?)\n");
+    exit(1);
+}
+$step('osTicket booted; loading plugin');
+// The plugin is normally already loaded by osTicket's PluginManager; only pull
+// the bootstrap in when its classes are genuinely absent, so a second include
+// can never redeclare them.
+if (!class_exists('\\Autotask\\AutotaskPlugin', false)) {
+    require_once __DIR__ . '/bootstrap.php';
+}
+$step('plugin ready; running checks');
 
 /* ----- micro test-runner -------------------------------------------------- */
 $RESULTS = array('pass' => 0, 'fail' => 0, 'skip' => 0);
